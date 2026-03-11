@@ -142,14 +142,14 @@ class ServerState:
         peer_port = request.transport.get_extra_info("peername")[1]  # Port
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
 # #VOICE NATURAL CHANGE
-#         #生成语音随机性（0.8）
-#         self.lm_gen.temp = float(request.query.get("audio_temperature", 0.8))
-#         #生成文字随机性（0.7）
-#         self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.7))
-#         #在多少个候选声音中选（50）
-#         self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 50))) 
-#         #同上文字（50）
-#         self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
+        #生成语音随机性（0.8）
+        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.8))
+        #生成文字随机性（0.7）
+        self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.7))
+        #在多少个候选声音中选（50）
+        self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 50))) 
+        #同上文字（50）
+        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
         
         # Construct full voice prompt path
         requested_voice_prompt_path = None
