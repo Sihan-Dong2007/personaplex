@@ -104,6 +104,8 @@ class ServerState:
         self.voice_prompt_dir = voice_prompt_dir
         self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate)
         self.lm_gen = LMGen(lm,
+#VOICE NATURAL
+                            #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
                             audio_silence_frame_cnt=int(0.5 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
@@ -139,10 +141,14 @@ class ServerState:
         peer = request.remote  # IP
         peer_port = request.transport.get_extra_info("peername")[1]  # Port
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
-
+#VOICE NATURAL CHANGE
+        #生成语音随机性（0.8）
         # self.lm_gen.temp = float(request.query["audio_temperature"])
+        #生成文字随机性（0.7）
         # self.lm_gen.temp_text = float(request.query["text_temperature"])
+        #在多少个候选声音中选（50）
         # self.lm_gen.top_k_text = max(1, int(request.query["text_topk"]))
+        #同上文字（50）
         # self.lm_gen.top_k = max(1, int(request.query["audio_topk"]))
         
         # Construct full voice prompt path
@@ -164,6 +170,7 @@ class ServerState:
         if self.lm_gen.voice_prompt != voice_prompt_path:
             if voice_prompt_path.endswith('.pt'):
                 # Load pre-saved voice prompt embeddings
+#CLONE VOICE
                 self.lm_gen.load_voice_prompt_embeddings(voice_prompt_path)
             else:
                 self.lm_gen.load_voice_prompt(voice_prompt_path)
