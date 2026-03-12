@@ -159,6 +159,10 @@ class ServerState:
         #同上文字（50）
         self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 40)))
         
+        # slight speaking speed variation (more human-like)
+        speed_variation = random.uniform(0.85, 0.95)
+        self.lm_gen.frame_rate = int(self.mimi.frame_rate * speed_variation)
+        
         # Construct full voice prompt path
         requested_voice_prompt_path = None
         voice_prompt_path = None
@@ -257,6 +261,7 @@ class ServerState:
                                 opus_writer.append_pcm(self.pause_short)
                             elif "." in _text:
                                 opus_writer.append_pcm(self.pause_long)
+                                self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.88,0.96))
                             elif "?" in _text or "!" in _text:
                                 opus_writer.append_pcm(self.pause_question)
                             msg = b"\x02" + bytes(_text, encoding="utf8")
