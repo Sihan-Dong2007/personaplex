@@ -119,7 +119,8 @@ class ServerState:
         self.lm_gen.streaming_forever(2)
     
     def warmup(self):
-        for _ in range(4):
+#warmup（减少第一次卡顿）
+        for _ in range(8):
             chunk = torch.zeros(1, 1, self.frame_size, dtype=torch.float32, device=self.device)
             codes = self.mimi.encode(chunk)
             _ = self.other_mimi.encode(chunk)
