@@ -174,7 +174,8 @@ class ServerState:
                 self.lm_gen.load_voice_prompt_embeddings(voice_prompt_path)
             else:
                 self.lm_gen.load_voice_prompt(voice_prompt_path)
-        self.lm_gen.text_prompt_tokens = self.text_tokenizer.encode(wrap_with_system_tags(request.query["text_prompt"])) if len(request.query["text_prompt"]) > 0 else None
+        prompt = "Speak naturally with pauses like a human. " + request.query["text_prompt"]
+        self.lm_gen.text_prompt_tokens = self.text_tokenizer.encode(wrap_with_system_tags(prompt))
         seed = int(request["seed"]) if "seed" in request.query else None
 
         async def recv_loop():
