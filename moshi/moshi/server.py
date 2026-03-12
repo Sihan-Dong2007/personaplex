@@ -103,7 +103,7 @@ class ServerState:
         self.text_tokenizer = text_tokenizer
         self.device = device
         self.voice_prompt_dir = voice_prompt_dir
-        #控制麦克风输入 buffer 延迟更低但GPU更忙
+        #控制麦克风输入 buffer 延迟更低但GPU更忙（危险！！！！！！！！！！！）
         self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate / 2)
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
@@ -111,7 +111,7 @@ class ServerState:
                             audio_silence_frame_cnt=int(0.8 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
-                            #AI 说话慢一点更像真人
+                            #AI 说话慢一点更像真人（危险！！！！！！！！！！）
                             frame_rate=int(self.mimi.frame_rate * 0.9),
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
