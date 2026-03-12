@@ -183,3 +183,4 @@ mlx-trace.json
 # Include everything in assets
 !assets/
 !assets/**
+.DS_Store
