@@ -117,9 +117,10 @@ class ServerState:
         )
 #改延迟优化的buffersize        
         self.lock = asyncio.Lock()
-        # pause buffers(逗号和句号加停顿)
-        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12))
-        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25))
+        # pause buffers(逗号和句号加停顿,现在再加一个问号)
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.28))
+        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.55))
+        self.pause_question = np.zeros(int(self.mimi.sample_rate * 0.65)) # question
         self.mimi.streaming_forever(2)
         self.other_mimi.streaming_forever(2)
         self.lm_gen.streaming_forever(2)
@@ -254,8 +255,10 @@ class ServerState:
                             # punctuation pause（还是标点符号的停顿）
                             if "," in _text:
                                 opus_writer.append_pcm(self.pause_short)
-                            elif any(p in _text for p in [".", "?", "!"]):
+                            elif "." in _text:
                                 opus_writer.append_pcm(self.pause_long)
+                            elif "?" in _text or "!" in _text:
+                                opus_writer.append_pcm(self.pause_question)
                             msg = b"\x02" + bytes(_text, encoding="utf8")
                             await ws.send_bytes(msg)
                         else:
