@@ -109,7 +109,8 @@ class ServerState:
                             audio_silence_frame_cnt=int(0.8 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
-                            frame_rate=self.mimi.frame_rate,
+                            #AI 说话慢一点更像真人
+                            frame_rate=int(self.mimi.frame_rate * 0.9),
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
 #改延迟优化的buffersize        
