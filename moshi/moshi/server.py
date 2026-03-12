@@ -251,6 +251,11 @@ class ServerState:
                         if text_token not in (0, 3):
                             _text = self.text_tokenizer.id_to_piece(text_token)  # type: ignore
                             _text = _text.replace("▁", " ")
+                            # punctuation pause（还是标点符号的停顿）
+                            if "," in _text:
+                                opus_writer.append_pcm(self.pause_short)
+                            elif any(p in _text for p in [".", "?", "!"]):
+                                opus_writer.append_pcm(self.pause_long)
                             msg = b"\x02" + bytes(_text, encoding="utf8")
                             await ws.send_bytes(msg)
                         else:
