@@ -105,12 +105,12 @@ class ServerState:
         self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate)
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
-                            #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
-                            audio_silence_frame_cnt=int(1 * self.mimi.frame_rate),
-                            sample_rate=self.mimi.sample_rate,
-                            device=device,
-                            frame_rate=self.mimi.frame_rate,
-                            save_voice_prompt_embeddings=save_voice_prompt_embeddings,
+                            # #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
+                            # audio_silence_frame_cnt=int(1 * self.mimi.frame_rate),
+                            # sample_rate=self.mimi.sample_rate,
+                            # device=device,
+                            # frame_rate=self.mimi.frame_rate,
+                            # save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
         
         self.lock = asyncio.Lock()
@@ -142,14 +142,14 @@ class ServerState:
         peer_port = request.transport.get_extra_info("peername")[1]  # Port
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
 # #VOICE NATURAL CHANGE
-        #生成语音随机性（0.8）
-        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.8))
-        #生成文字随机性（0.7）
-        self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.7))
-        #在多少个候选声音中选（50）
-        self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 50))) 
-        #同上文字（50）
-        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
+        # #生成语音随机性（0.8）
+        # self.lm_gen.temp = float(request.query.get("audio_temperature", 0.8))
+        # #生成文字随机性（0.7）
+        # self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.7))
+        # #在多少个候选声音中选（50）
+        # self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 50))) 
+        # #同上文字（50）
+        # self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
         
         # Construct full voice prompt path
         requested_voice_prompt_path = None
