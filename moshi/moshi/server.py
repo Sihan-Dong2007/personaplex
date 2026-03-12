@@ -117,6 +117,9 @@ class ServerState:
         )
 #改延迟优化的buffersize        
         self.lock = asyncio.Lock()
+        # pause buffers(逗号和句号加停顿)
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12))
+        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25))
         self.mimi.streaming_forever(2)
         self.other_mimi.streaming_forever(2)
         self.lm_gen.streaming_forever(2)
