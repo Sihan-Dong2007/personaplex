@@ -118,8 +118,8 @@ class ServerState:
 #改延迟优化的buffersize        
         self.lock = asyncio.Lock()
         # pause buffers(逗号和句号加停顿,现在再加一个问号)
-        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.28))
-        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.55))
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.40))
+        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.85))
         self.pause_question = np.zeros(int(self.mimi.sample_rate * 0.65)) # question
         self.mimi.streaming_forever(2)
         self.other_mimi.streaming_forever(2)
@@ -249,6 +249,9 @@ class ServerState:
                             continue
                         assert tokens.shape[1] == self.lm_gen.lm_model.dep_q + 1
                         main_pcm = self.mimi.decode(tokens[:, 1:9])
+                        # micro prosody variation
+                        if random.random() < 0.15:
+                            self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.86,0.98))
                         _ = self.other_mimi.decode(tokens[:, 1:9])
                         main_pcm = main_pcm.cpu()
                         opus_writer.append_pcm(main_pcm[0, 0].numpy())
@@ -257,6 +260,8 @@ class ServerState:
                             _text = self.text_tokenizer.id_to_piece(text_token)  # type: ignore
                             _text = _text.replace("▁", " ")
                             # punctuation pause（还是标点符号的停顿）
+                            if random.random() < 0.08:
+                                opus_writer.append_pcm(np.zeros(int(self.mimi.sample_rate * 0.22)))
                             if "," in _text:
                                 opus_writer.append_pcm(self.pause_short)
                             elif "." in _text:
