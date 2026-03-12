@@ -176,7 +176,7 @@ class ServerState:
                 self.lm_gen.load_voice_prompt_embeddings(voice_prompt_path)
             else:
                 self.lm_gen.load_voice_prompt(voice_prompt_path)
-        prompt = "Speak naturally like a human, with breathing pauses and emotional tone. " + request.query["text_prompt"]
+        prompt = "Speak like a real human in a relaxed conversation. Use natural rhythm, breathing pauses, and emotional tone. Avoid sounding robotic. " + request.query["text_prompt"]
         self.lm_gen.text_prompt_tokens = self.text_tokenizer.encode(wrap_with_system_tags(prompt))
         seed = int(request["seed"]) if "seed" in request.query else None
 
