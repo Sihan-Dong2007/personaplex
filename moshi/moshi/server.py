@@ -73,7 +73,8 @@ def seed_all(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.backends.cudnn.deterministic = False
-    torch.backends.cudnn.benchmark = False
+    #GPU kernel 自动优化,推理更快
+    torch.backends.cudnn.benchmark = True
 
 
 def wrap_with_system_tags(text: str) -> str:
