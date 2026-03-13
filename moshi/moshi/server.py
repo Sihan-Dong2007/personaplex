@@ -112,7 +112,7 @@ class ServerState:
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             #AI 说话慢一点更像真人（危险！！！！！！！！！！）
-                            frame_rate=int(self.mimi.frame_rate * 0.85),
+                            frame_rate=int(self.mimi.frame_rate * random.uniform(0.85,0.95)),
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
 #改延迟优化的buffersize        
@@ -249,6 +249,9 @@ class ServerState:
                             continue
                         assert tokens.shape[1] == self.lm_gen.lm_model.dep_q + 1
                         main_pcm = self.mimi.decode(tokens[:, 1:9])
+                        # sentence-internal speed variation
+                        if random.random() < 0.12:
+                            self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.85, 1.0))
                         # micro prosody variation
                         if random.random() < 0.35:
                             self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.82,1.02))
@@ -264,6 +267,8 @@ class ServerState:
                                 opus_writer.append_pcm(np.zeros(int(self.mimi.sample_rate * 0.22)))
                             if "," in _text:
                                 opus_writer.append_pcm(self.pause_short)
+                                # slight slow down after comma
+                                self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.82,0.9))
                             elif "." in _text:
                                 opus_writer.append_pcm(self.pause_long)
                                 self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.88,0.96))
