@@ -151,13 +151,13 @@ class ServerState:
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
 # #VOICE NATURAL CHANGE
         #生成语音随机性（0.8）
-        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.85))
+        self.lm_gen.temp = float(request.query.get("audio_temperature", 1))
         #生成文字随机性（0.7）
-        self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.55))
+        self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.7))
         #在多少个候选声音中选（50）
         self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 80))) 
         #同上文字（50）
-        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 40)))
+        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 100)))
         
         # slight speaking speed variation (more human-like)
         speed_variation = random.uniform(0.85, 0.95)
@@ -250,8 +250,8 @@ class ServerState:
                         assert tokens.shape[1] == self.lm_gen.lm_model.dep_q + 1
                         main_pcm = self.mimi.decode(tokens[:, 1:9])
                         # micro prosody variation
-                        if random.random() < 0.15:
-                            self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.86,0.98))
+                        if random.random() < 0.35:
+                            self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.82,1.02))
                         _ = self.other_mimi.decode(tokens[:, 1:9])
                         main_pcm = main_pcm.cpu()
                         opus_writer.append_pcm(main_pcm[0, 0].numpy())
