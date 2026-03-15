@@ -498,15 +498,18 @@ def main():
     app.router.add_get("/api/chat", state.handle_chat)
     
     #VOICE CLONE
-    @app.get("/voices")
     async def list_voices(request):
         voice_dir = state.voice_prompt_dir
         voices = []
+
         if voice_dir and os.path.exists(voice_dir):
             for f in os.listdir(voice_dir):
                 if f.endswith(".wav") or f.endswith(".pt"):
                     voices.append(f)
+
         return web.json_response({"voices": voices})
+
+    app.router.add_get("/voices", list_voices)
     
     if static_path is not None:
         async def handle_root(_):
