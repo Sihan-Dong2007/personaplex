@@ -73,7 +73,6 @@ def seed_all(seed):
     random.seed(seed)
     np.random.seed(seed)
     torch.backends.cudnn.deterministic = False
-    #GPU kernel 自动优化,推理更快
     torch.backends.cudnn.benchmark = False
 
 
@@ -103,30 +102,23 @@ class ServerState:
         self.text_tokenizer = text_tokenizer
         self.device = device
         self.voice_prompt_dir = voice_prompt_dir
-        #控制麦克风输入 buffer 延迟更低但GPU更忙（危险！！！！！！！！！！！）
         self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate)
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
                             #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
-                            audio_silence_frame_cnt=int(0.8 * self.mimi.frame_rate),
+                            audio_silence_frame_cnt=int(0.5 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
-                            #AI 说话慢一点更像真人（危险！！！！！！！！！！）
-                            frame_rate=int(self.mimi.frame_rate * random.uniform(0.85,0.95)),
+                            frame_rate=self.mimi.frame_rate,
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
-#改延迟优化的buffersize        
+        
         self.lock = asyncio.Lock()
-        # pause buffers(逗号和句号加停顿,现在再加一个问号)
-        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.40))
-        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.85))
-        self.pause_question = np.zeros(int(self.mimi.sample_rate * 0.65)) # question
-        self.mimi.streaming_forever(2)
-        self.other_mimi.streaming_forever(2)
-        self.lm_gen.streaming_forever(2)
+        self.mimi.streaming_forever(1)
+        self.other_mimi.streaming_forever(1)
+        self.lm_gen.streaming_forever(1)
     
     def warmup(self):
-#warmup（减少第一次卡顿）
         for _ in range(4):
             chunk = torch.zeros(1, 1, self.frame_size, dtype=torch.float32, device=self.device)
             codes = self.mimi.encode(chunk)
@@ -149,19 +141,15 @@ class ServerState:
         peer = request.remote  # IP
         peer_port = request.transport.get_extra_info("peername")[1]  # Port
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
-# #VOICE NATURAL CHANGE
+#VOICE NATURAL CHANGE
         #生成语音随机性（0.8）
-        self.lm_gen.temp = float(request.query.get("audio_temperature", 1))
+        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.8))
         #生成文字随机性（0.7）
         self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.7))
         #在多少个候选声音中选（50）
-        self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 80))) 
+        self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 50))) 
         #同上文字（50）
-        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 100)))
-        
-        # slight speaking speed variation (more human-like)
-        speed_variation = random.uniform(0.85, 0.95)
-        self.lm_gen.frame_rate = int(self.mimi.frame_rate * speed_variation)
+        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
         
         # Construct full voice prompt path
         requested_voice_prompt_path = None
@@ -186,8 +174,7 @@ class ServerState:
                 self.lm_gen.load_voice_prompt_embeddings(voice_prompt_path)
             else:
                 self.lm_gen.load_voice_prompt(voice_prompt_path)
-        prompt = "You are excited and interested in the conversation.Let your voice rise and fall naturally.  Use natural rhythm, breathing pauses, and emotional tone. Use expressive intonation and natural pitch variation. Pause naturally at commas and full stops. Use breathing pauses between phrases. " + request.query["text_prompt"]
-        self.lm_gen.text_prompt_tokens = self.text_tokenizer.encode(wrap_with_system_tags(prompt))
+        self.lm_gen.text_prompt_tokens = self.text_tokenizer.encode(wrap_with_system_tags(request.query["text_prompt"])) if len(request.query["text_prompt"]) > 0 else None
         seed = int(request["seed"]) if "seed" in request.query else None
 
         async def recv_loop():
@@ -249,12 +236,6 @@ class ServerState:
                             continue
                         assert tokens.shape[1] == self.lm_gen.lm_model.dep_q + 1
                         main_pcm = self.mimi.decode(tokens[:, 1:9])
-                        # sentence-internal speed variation
-                        if random.random() < 0.12:
-                            self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.85, 1.0))
-                        # micro prosody variation
-                        if random.random() < 0.35:
-                            self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.82,1.02))
                         _ = self.other_mimi.decode(tokens[:, 1:9])
                         main_pcm = main_pcm.cpu()
                         opus_writer.append_pcm(main_pcm[0, 0].numpy())
@@ -262,18 +243,6 @@ class ServerState:
                         if text_token not in (0, 3):
                             _text = self.text_tokenizer.id_to_piece(text_token)  # type: ignore
                             _text = _text.replace("▁", " ")
-                            # punctuation pause（还是标点符号的停顿）
-                            if random.random() < 0.08:
-                                opus_writer.append_pcm(np.zeros(int(self.mimi.sample_rate * 0.22)))
-                            if "," in _text:
-                                opus_writer.append_pcm(self.pause_short)
-                                # slight slow down after comma
-                                self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.82,0.9))
-                            elif "." in _text:
-                                opus_writer.append_pcm(self.pause_long)
-                                self.lm_gen.frame_rate = int(self.mimi.frame_rate * random.uniform(0.88,0.96))
-                            elif "?" in _text or "!" in _text:
-                                opus_writer.append_pcm(self.pause_question)
                             msg = b"\x02" + bytes(_text, encoding="utf8")
                             await ws.send_bytes(msg)
                         else:
@@ -492,26 +461,10 @@ def main():
         voice_prompt_dir=args.voice_prompt_dir,
         save_voice_prompt_embeddings=False,
     )
-    # logger.info("warming up the model")
-    # state.warmup()
+    logger.info("warming up the model")
+    state.warmup()
     app = web.Application()
     app.router.add_get("/api/chat", state.handle_chat)
-    
-    
-    #VOICE CLONE
-    async def list_voices(request):
-        voice_dir = state.voice_prompt_dir
-        voices = []
-
-        if voice_dir and os.path.exists(voice_dir):
-            for f in os.listdir(voice_dir):
-                if f.endswith(".wav") or f.endswith(".pt"):
-                    voices.append(f)
-
-        return web.json_response({"voices": voices})
-
-    app.router.add_get("/voices", list_voices)
-    
     if static_path is not None:
         async def handle_root(_):
             return web.FileResponse(os.path.join(static_path, "index.html"))
