@@ -243,6 +243,10 @@ class ServerState:
                         main_pcm = self.mimi.decode(tokens[:, 1:9])
                         _ = self.other_mimi.decode(tokens[:, 1:9])
                         main_pcm = main_pcm.cpu()
+                        #防止音频buffer无限增长
+                        if opus_writer.buffered_duration() > 1.0:
+                            await asyncio.sleep(0.02)
+                            continue
                         opus_writer.append_pcm(main_pcm[0, 0].numpy())
                         text_token = tokens[0, 0, 0].item()
                         if text_token not in (0, 3):
