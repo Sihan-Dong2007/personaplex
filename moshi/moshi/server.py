@@ -110,14 +110,14 @@ class ServerState:
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             #AI 说话慢一点更像真人
-                            frame_rate=int(self.mimi.frame_rate * 0.9),
+                            frame_rate=int(self.mimi.frame_rate),
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
         
         self.lock = asyncio.Lock()
         # pause buffers(逗号和句号加停顿)
-        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12),dtype=np.float32)
-        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25),dtype=np.float32)
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.08),dtype=np.float32)
+        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.18),dtype=np.float32)
         self.mimi.streaming_forever(1)
         self.other_mimi.streaming_forever(1)
         self.lm_gen.streaming_forever(1)
