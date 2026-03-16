@@ -102,7 +102,7 @@ class ServerState:
         self.text_tokenizer = text_tokenizer
         self.device = device
         self.voice_prompt_dir = voice_prompt_dir
-        self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate)
+        self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate / 2)
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
                             #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
