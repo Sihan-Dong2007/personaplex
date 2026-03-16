@@ -110,7 +110,7 @@ class ServerState:
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             #AI 说话慢一点更像真人
-                            frame_rate=int(self.mimi.frame_rate * 0.85),
+                            frame_rate=self.mimi.frame_rate,
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
         
@@ -277,6 +277,12 @@ class ServerState:
             self.mimi.reset_streaming()
             self.other_mimi.reset_streaming()
             self.lm_gen.reset_streaming()
+            
+            # slight speaking speed variation (more human-like)
+            speed_variation = random.normalvariate(0.9, 0.03)
+            speed_variation = max(0.82, min(0.97, speed_variation))
+            self.lm_gen.frame_rate = int(self.mimi.frame_rate * speed_variation)
+            
             async def is_alive():
                 if close or ws.closed:
                     return False
