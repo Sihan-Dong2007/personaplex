@@ -106,7 +106,7 @@ class ServerState:
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
                             #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
-                            audio_silence_frame_cnt=int(0.8 * self.mimi.frame_rate),
+                            audio_silence_frame_cnt=int(0.5 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             #AI 说话慢一点更像真人
