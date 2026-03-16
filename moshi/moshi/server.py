@@ -147,13 +147,13 @@ class ServerState:
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
 # #VOICE NATURAL CHANGE
         #生成语音随机性（0.8）
-        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.85))
+        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.9))
         #生成文字随机性（0.7）
         self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.55))
         #在多少个候选声音中选（50）
         self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 80))) 
         #同上文字（50）
-        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 40)))
+        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 60)))
         
         # Construct full voice prompt path
         requested_voice_prompt_path = None
@@ -279,8 +279,8 @@ class ServerState:
             self.lm_gen.reset_streaming()
             
             # slight speaking speed variation (more human-like)
-            speed_variation = random.normalvariate(0.9, 0.03)
-            speed_variation = max(0.82, min(0.97, speed_variation))
+            speed_variation = random.normalvariate(0.9, 0.035)
+            speed_variation = max(0.85, min(0.98, speed_variation))
             self.lm_gen.frame_rate = int(self.mimi.frame_rate * speed_variation)
             
             async def is_alive():
