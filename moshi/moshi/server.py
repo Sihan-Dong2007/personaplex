@@ -127,7 +127,7 @@ class ServerState:
     
     def warmup(self):
 #warmup（减少第一次卡顿）
-        for _ in range(8):
+        for _ in range(4):
             chunk = torch.zeros(1, 1, self.frame_size, dtype=torch.float32, device=self.device)
             codes = self.mimi.encode(chunk)
             _ = self.other_mimi.encode(chunk)
