@@ -112,11 +112,11 @@ class ServerState:
                             frame_rate=self.mimi.frame_rate,
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
-#改延迟优化的buffersize        
+        
         self.lock = asyncio.Lock()
-        self.mimi.streaming_forever(2)
-        self.other_mimi.streaming_forever(2)
-        self.lm_gen.streaming_forever(2)
+        self.mimi.streaming_forever(1)
+        self.other_mimi.streaming_forever(1)
+        self.lm_gen.streaming_forever(1)
     
     def warmup(self):
         for _ in range(4):
