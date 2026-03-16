@@ -110,7 +110,7 @@ class ServerState:
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             #AI 说话慢一点更像真人
-                            frame_rate=int(self.mimi.frame_rate * 0.9),
+                            frame_rate=int(self.mimi.frame_rate * 0.85),
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
         
@@ -147,11 +147,11 @@ class ServerState:
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
 # #VOICE NATURAL CHANGE
         #生成语音随机性（0.8）
-        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.75))
+        self.lm_gen.temp = float(request.query.get("audio_temperature", 0.85))
         #生成文字随机性（0.7）
-        self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.6))
+        self.lm_gen.temp_text = float(request.query.get("text_temperature", 0.55))
         #在多少个候选声音中选（50）
-        self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 30))) 
+        self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 80))) 
         #同上文字（50）
         self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 40)))
         
@@ -178,7 +178,7 @@ class ServerState:
                 self.lm_gen.load_voice_prompt_embeddings(voice_prompt_path)
             else:
                 self.lm_gen.load_voice_prompt(voice_prompt_path)
-        prompt = "Speak naturally like a human, with breathing pauses and emotional tone. " + request.query["text_prompt"]
+        prompt = "You are excited and interested in the conversation.Let your voice rise and fall naturally.  Use natural rhythm, breathing pauses, and emotional tone. Use expressive intonation and natural pitch variation. Pause naturally at commas and full stops. Use breathing pauses between phrases. " + request.query["text_prompt"]
         self.lm_gen.text_prompt_tokens = self.text_tokenizer.encode(wrap_with_system_tags(prompt))
         seed = int(request["seed"]) if "seed" in request.query else None
 
