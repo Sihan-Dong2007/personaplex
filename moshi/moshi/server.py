@@ -106,7 +106,7 @@ class ServerState:
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
                             #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
-                            audio_silence_frame_cnt=int(0.8 * self.mimi.frame_rate),
+                            audio_silence_frame_cnt=int(1.1 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             #AI 说话慢一点更像真人
@@ -279,8 +279,8 @@ class ServerState:
             self.lm_gen.reset_streaming()
             
             # slight speaking speed variation (more human-like)
-            speed_variation = random.normalvariate(0.9, 0.035)
-            speed_variation = max(0.85, min(0.98, speed_variation))
+            speed_variation = random.normalvariate(0.82, 0.03)
+            speed_variation = max(0.75, min(0.90, speed_variation))
             self.lm_gen.frame_rate = int(self.mimi.frame_rate * speed_variation)
             
             async def is_alive():
