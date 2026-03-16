@@ -492,8 +492,8 @@ def main():
         voice_prompt_dir=args.voice_prompt_dir,
         save_voice_prompt_embeddings=False,
     )
-    logger.info("warming up the model")
-    state.warmup()
+    # logger.info("warming up the model")
+    # state.warmup()
     app = web.Application()
     app.router.add_get("/api/chat", state.handle_chat)
     
