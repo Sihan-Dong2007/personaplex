@@ -106,7 +106,7 @@ class ServerState:
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
                             #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
-                            audio_silence_frame_cnt=int(0.5 * self.mimi.frame_rate),
+                            audio_silence_frame_cnt=int(1 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
                             frame_rate=self.mimi.frame_rate,
@@ -141,7 +141,7 @@ class ServerState:
         peer = request.remote  # IP
         peer_port = request.transport.get_extra_info("peername")[1]  # Port
         clog.log("info", f"Incoming connection from {peer}:{peer_port}")
-#VOICE NATURAL CHANGE
+# #VOICE NATURAL CHANGE
         #生成语音随机性（0.8）
         self.lm_gen.temp = float(request.query.get("audio_temperature", 0.8))
         #生成文字随机性（0.7）
