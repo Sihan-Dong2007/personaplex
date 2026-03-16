@@ -116,7 +116,7 @@ class ServerState:
         
         self.lock = asyncio.Lock()
         # pause buffers(逗号和句号加停顿)
-        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12))
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.8))
         self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25))
         self.mimi.streaming_forever(1)
         self.other_mimi.streaming_forever(1)
@@ -249,10 +249,19 @@ class ServerState:
                             _text = self.text_tokenizer.id_to_piece(text_token)  # type: ignore
                             _text = _text.replace("▁", " ")
                             # punctuation pause（还是标点符号的停顿）
-                            if "," in _text:
-                                opus_writer.append_pcm(self.pause_short)
-                            elif any(p in _text for p in [".", "?", "!"]):
-                                opus_writer.append_pcm(self.pause_long)
+                            _text = _text.strip()
+                            if len(_text) == 0:
+                                continue
+                            if any(p in _text for p in [".", "?", "!"]):
+                                try:
+                                    opus_writer.append_pcm(self.pause_long)
+                                except Exception as e:
+                                    clog.log("error", f"Failed to append long pause: {e}")
+                            elif "," in _text:
+                                try:
+                                    opus_writer.append_pcm(self.pause_short)
+                                except Exception as e:
+                                    clog.log("error", f"Failed to append short pause: {e}")
                             msg = b"\x02" + bytes(_text, encoding="utf8")
                             await ws.send_bytes(msg)
                         else:
