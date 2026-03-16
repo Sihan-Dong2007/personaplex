@@ -74,7 +74,7 @@ def seed_all(seed):
     np.random.seed(seed)
     torch.backends.cudnn.deterministic = False
     #GPU kernel 自动优化,推理更快
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = False
 
 
 def wrap_with_system_tags(text: str) -> str:
@@ -104,7 +104,7 @@ class ServerState:
         self.device = device
         self.voice_prompt_dir = voice_prompt_dir
         #控制麦克风输入 buffer 延迟更低但GPU更忙（危险！！！！！！！！！！！）
-        self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate / 2)
+        self.frame_size = int(self.mimi.sample_rate / self.mimi.frame_rate)
         self.lm_gen = LMGen(lm,
 #VOICE NATURAL
                             #AI 在说话时允许的“停顿长度”(0.8,1)/语音节奏
