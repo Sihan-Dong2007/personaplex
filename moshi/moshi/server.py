@@ -109,11 +109,15 @@ class ServerState:
                             audio_silence_frame_cnt=int(0.8 * self.mimi.frame_rate),
                             sample_rate=self.mimi.sample_rate,
                             device=device,
-                            frame_rate=self.mimi.frame_rate,
+                            #AI 说话慢一点更像真人
+                            frame_rate=int(self.mimi.frame_rate * 0.9),
                             save_voice_prompt_embeddings=save_voice_prompt_embeddings,
         )
         
         self.lock = asyncio.Lock()
+        # pause buffers(逗号和句号加停顿)
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12))
+        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25))
         self.mimi.streaming_forever(1)
         self.other_mimi.streaming_forever(1)
         self.lm_gen.streaming_forever(1)
