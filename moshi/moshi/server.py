@@ -252,7 +252,12 @@ class ServerState:
                             if "," in _text:
                                 opus_writer.append_pcm(self.pause_short)
                             elif any(p in _text for p in [".", "?", "!"]):
-                                opus_writer.append_pcm(self.pause_long)
+                                frame = 960
+                                pcm = self.pause_long
+                                for i in range(0, len(pcm), frame):
+                                    chunk = pcm[i:i+frame]
+                                    if len(chunk) == frame:
+                                        opus_writer.append_pcm(chunk)
                             msg = b"\x02" + bytes(_text, encoding="utf8")
                             await ws.send_bytes(msg)
                         else:
