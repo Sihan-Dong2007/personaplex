@@ -116,8 +116,8 @@ class ServerState:
         
         self.lock = asyncio.Lock()
         # pause buffers(逗号和句号加停顿)
-        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12),dtype=np.float32)
-        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25),dtype=np.float32)
+        self.pause_short = np.zeros(int(self.mimi.sample_rate * 0.12))
+        self.pause_long = np.zeros(int(self.mimi.sample_rate * 0.25))
         self.mimi.streaming_forever(1)
         self.other_mimi.streaming_forever(1)
         self.lm_gen.streaming_forever(1)
@@ -153,7 +153,7 @@ class ServerState:
         #在多少个候选声音中选（50）
         self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 80))) 
         #同上文字（50）
-        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
+        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 60)))
         
         # Construct full voice prompt path
         requested_voice_prompt_path = None
@@ -243,25 +243,11 @@ class ServerState:
                         main_pcm = self.mimi.decode(tokens[:, 1:9])
                         _ = self.other_mimi.decode(tokens[:, 1:9])
                         main_pcm = main_pcm.cpu()
-                        #防止音频buffer无限增长
-                        # if opus_writer.buffered_duration() > 1.0:
-                        #     await asyncio.sleep(0.02)
-                        #     continue
                         opus_writer.append_pcm(main_pcm[0, 0].numpy())
                         text_token = tokens[0, 0, 0].item()
                         if text_token not in (0, 3):
                             _text = self.text_tokenizer.id_to_piece(text_token)  # type: ignore
                             _text = _text.replace("▁", " ")
-                            # punctuation pause（还是标点符号的停顿）
-                            if "," in _text:
-                                opus_writer.append_pcm(self.pause_short)
-                            elif any(p in _text for p in [".", "?", "!"]):
-                                frame = 960
-                                pcm = self.pause_long
-                                for i in range(0, len(pcm), frame):
-                                    chunk = pcm[i:i+frame]
-                                    if len(chunk) == frame:
-                                        opus_writer.append_pcm(chunk)
                             msg = b"\x02" + bytes(_text, encoding="utf8")
                             await ws.send_bytes(msg)
                         else:
