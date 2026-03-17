@@ -153,7 +153,7 @@ class ServerState:
         #在多少个候选声音中选（50）
         self.lm_gen.top_k_text = max(1, int(request.query.get("top_k_text", 80))) 
         #同上文字（50）
-        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 60)))
+        self.lm_gen.top_k = max(1, int(request.query.get("audio_topk", 50)))
         
         # Construct full voice prompt path
         requested_voice_prompt_path = None
