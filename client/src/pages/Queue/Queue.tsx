@@ -108,15 +108,22 @@ const Homepage = ({
             onChange={(e) => setVoicePrompt(e.target.value)}
             className="w-full p-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#76b900] focus:border-transparent"
           >
-            {voiceOptions.map((voice) => (
-              <option key={voice} value={voice}>
-              {voice
-                .replace('.pt', '')
-                .replace('.wav','')
-                .replace(/^NAT/, 'NATURAL_')
-                .replace(/^VAR/, 'VARIETY_')}
-              </option>
-            ))}
+            {voiceOptions.map((voice) => {
+              let display = voice;
+  
+              if (voice.endsWith('.pt')) {
+              // 只处理 .pt 文件，替换前缀和去掉 .pt
+                display = voice.replace('.pt', '')
+                   .replace(/^NAT/, 'NATURAL_')
+                   .replace(/^VAR/, 'VARIETY_');
+              }
+              // .wav 文件保持原名或可自定义显示名
+              return (
+                <option key={voice} value={voice}>
+                  {display}
+                </option>
+              );
+            })}
           </select>
       </div>
 
