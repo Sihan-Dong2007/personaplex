@@ -142,7 +142,10 @@ export const Queue:FC = () => {
   const audioContext = useRef<AudioContext | null>(null);
   const worklet = useRef<AudioWorkletNode | null>(null);
   useEffect(() => {
-  fetch("/api/voices")  // 调用 server API
+  fetch("https://localhost:8998/api/voices", { 
+    method: "GET",
+    mode: "cors" 
+  })  // 调用 server API
     .then(res => res.json())
     .then((data: string[]) => {
       setVoiceOptions(data);
