@@ -476,6 +476,24 @@ def main():
     state.warmup()
     app = web.Application()
     app.router.add_get("/api/chat", state.handle_chat)
+    async def list_voices(request):
+        voice_dir = state.voice_prompt_dir
+    
+        if voice_dir is None:
+            return web.json_response([])
+    
+        files = os.listdir(voice_dir)
+
+        voices = [
+            f for f in files
+            if f.endswith(".pt") or f.endswith(".wav")
+        ]
+
+        voices.sort()
+
+        return web.json_response(voices)
+
+    app.router.add_get("/api/voices", list_voices)
     if static_path is not None:
         async def handle_root(_):
             return web.FileResponse(os.path.join(static_path, "index.html"))

@@ -9,12 +9,12 @@ import { env } from "../../env";
 import { prewarmDecoderWorker } from "../../decoder/decoderWorker";
 
 // 声音UI显示
-const VOICE_OPTIONS = [
-  "NATF0.pt", "NATF1.pt", "NATF2.pt", "NATF3.pt",
-  "NATM0.pt", "NATM1.pt", "NATM2.pt", "NATM3.pt",
-  "VARF0.pt", "VARF1.pt", "VARF2.pt", "VARF3.pt", "VARF4.pt",
-  "VARM0.pt", "VARM1.pt", "VARM2.pt", "VARM3.pt", "VARM4.pt",
-];
+// const VOICE_OPTIONS = [
+//   "NATF0.pt", "NATF1.pt", "NATF2.pt", "NATF3.pt",
+//   "NATM0.pt", "NATM1.pt", "NATM2.pt", "NATM3.pt",
+//   "VARF0.pt", "VARF1.pt", "VARF2.pt", "VARF3.pt", "VARF4.pt",
+//   "VARM0.pt", "VARM1.pt", "VARM2.pt", "VARM3.pt", "VARM4.pt",
+// ];
 
 const TEXT_PROMPT_PRESETS = [
   {
@@ -35,6 +35,7 @@ const TEXT_PROMPT_PRESETS = [
   },
 ];
 
+
 interface HomepageProps {
   showMicrophoneAccessMessage: boolean;
   startConnection: () => Promise<void>;
@@ -42,6 +43,7 @@ interface HomepageProps {
   setTextPrompt: (value: string) => void;
   voicePrompt: string;
   setVoicePrompt: (value: string) => void;
+  voiceOptions: string[];
 }
 
 const Homepage = ({
@@ -103,14 +105,14 @@ const Homepage = ({
             name="voice-prompt"
             value={voicePrompt}
             onChange={(e) => setVoicePrompt(e.target.value)}
-            className="w-full p-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#76b900] focus:border-transparent"
           >
-            {VOICE_OPTIONS.map((voice) => (
+            {voiceOptions.map((voice) => (
               <option key={voice} value={voice}>
-                {voice
-                  .replace('.pt', '')
-                  .replace(/^NAT/, 'NATURAL_')
-                  .replace(/^VAR/, 'VARIETY_')}
+              {voice
+                .replace('.pt', '')
+                .replace('.wav','')
+                .replace(/^NAT/, 'NATURAL_')
+                .replace(/^VAR/, 'VARIETY_')}
               </option>
             ))}
           </select>
@@ -133,9 +135,24 @@ export const Queue:FC = () => {
   const [hasMicrophoneAccess, setHasMicrophoneAccess] = useState<boolean>(false);
   const [showMicrophoneAccessMessage, setShowMicrophoneAccessMessage] = useState<boolean>(false);
   const modelParams = useModelParams();
+  const [voiceOptions, setVoiceOptions] = useState<string[]>([]);
 
   const audioContext = useRef<AudioContext | null>(null);
   const worklet = useRef<AudioWorkletNode | null>(null);
+  useEffect(() => {
+  fetch("/api/voices")  // 调用 server API
+    .then(res => res.json())
+    .then((data: string[]) => {
+      setVoiceOptions(data);
+      if(data.length > 0 && !modelParams.voicePrompt) {
+        // 默认选第一个声音
+        modelParams.setVoicePrompt(data[0]);
+      }
+    })
+    .catch(err => {
+      console.error("Failed to load voices:", err);
+    });
+  }, [modelParams]);
   
   // enable eruda in development
   useEffect(() => {
@@ -210,6 +227,7 @@ export const Queue:FC = () => {
           setTextPrompt={modelParams.setTextPrompt}
           voicePrompt={modelParams.voicePrompt}
           setVoicePrompt={modelParams.setVoicePrompt}
+          voiceOptions={voiceOptions}
         />
       )}
     </>
