@@ -148,6 +148,7 @@ export const Queue:FC = () => {
   })  // 调用 server API
     .then(res => res.json())
     .then((data: string[]) => {
+      console.log("Fetched voiceOptions:", data);
       setVoiceOptions(data);
       if(data.length > 0 && !modelParams.voicePrompt) {
         // 默认选第一个声音
