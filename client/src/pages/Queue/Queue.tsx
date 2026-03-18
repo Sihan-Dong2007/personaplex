@@ -8,8 +8,9 @@ import { useModelParams } from "../Conversation/hooks/useModelParams";
 import { env } from "../../env";
 import { prewarmDecoderWorker } from "../../decoder/decoderWorker";
 
+// 声音UI显示
 const VOICE_OPTIONS = [
-  "NATF0.pt", "NATF1.pt", "NATF2.pt", "NATF3.pt",
+  "prompt.pt","NATF0.pt", "NATF1.pt", "NATF2.pt", "NATF3.pt",
   "NATM0.pt", "NATM1.pt", "NATM2.pt", "NATM3.pt",
   "VARF0.pt", "VARF1.pt", "VARF2.pt", "VARF3.pt", "VARF4.pt",
   "VARM0.pt", "VARM1.pt", "VARM2.pt", "VARM3.pt", "VARM4.pt",
