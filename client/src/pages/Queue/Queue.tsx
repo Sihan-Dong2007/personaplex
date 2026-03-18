@@ -53,6 +53,7 @@ const Homepage = ({
   setTextPrompt,
   voicePrompt,
   setVoicePrompt,
+  voiceOptions,
 }: HomepageProps) => {
   return (
     <div className="text-center h-screen w-screen p-4 flex flex-col items-center pt-8">
@@ -105,6 +106,7 @@ const Homepage = ({
             name="voice-prompt"
             value={voicePrompt}
             onChange={(e) => setVoicePrompt(e.target.value)}
+            className="w-full p-3 bg-white text-black border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#76b900] focus:border-transparent"
           >
             {voiceOptions.map((voice) => (
               <option key={voice} value={voice}>
