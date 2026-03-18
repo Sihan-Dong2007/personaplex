@@ -157,6 +157,7 @@ export const Queue:FC = () => {
     })
     .catch(err => {
       console.error("Failed to load voices:", err);
+      alert("Voice fetch failed: " + err);
     });
   }, [modelParams]);
   
